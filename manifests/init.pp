@@ -257,4 +257,11 @@ class pihole (
     require => [File[$full_installer_path], Package['curl', 'ca-certificates'], Concat['/etc/pihole/pihole.toml'], User[$user]],
     timeout => 0,
   }
+
+  service { 'pihole-FTL':
+    ensure    => 'running',
+    enable    => 'true',
+    subscribe => File['/etc/pihole/pihole.toml'],
+  }
+
 }
