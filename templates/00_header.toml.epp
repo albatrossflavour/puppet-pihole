@@ -1,4 +1,5 @@
-# Pi-hole configuration file
+# Pi-hole configuration file (v6.2.3)
 # Encoding: UTF-8
-# This file is managed by Puppet - DO NOT EDIT MANUALLY
+# This file is managed by pihole-FTL
+# Last updated on 2025-09-17 11:49:00 AEST
 #
