@@ -130,114 +130,125 @@ class pihole (
     require => User[$user],
   }
 
-  # Manage pihole.toml configuration file using concat
-  concat { '/etc/pihole/pihole.toml':
+  # COMMENTED OUT FOR INIFILE TESTING
+  # # Manage pihole.toml configuration file using concat
+  # concat { '/etc/pihole/pihole.toml':
+  #   ensure  => present,
+  #   mode    => '0644',
+  #   owner   => $user,
+  #   group   => $group,
+  #   require => File['/etc/pihole'],
+  # }
+
+  # # Header fragment
+  # concat::fragment { 'pihole_header':
+  #   target  => '/etc/pihole/pihole.toml',
+  #   content => epp('pihole/00_header.toml.epp'),
+  #   order   => '00',
+  # }
+
+  # # DNS basic configuration fragment
+  # concat::fragment { 'pihole_dns_basic':
+  #   target  => '/etc/pihole/pihole.toml',
+  #   content => epp('pihole/10_dns_basic.toml.epp', {
+  #     'dns_servers'     => $dns_servers,
+  #     'interface'       => $interface,
+  #     'dns_domain'      => $dns_domain,
+  #     'listening_mode'  => $listening_mode,
+  #     'query_logging'   => $query_logging,
+  #     'cache_size'      => $cache_size,
+  #     'blocking_enabled'=> $blocking_enabled,
+  #     'dns_advanced'    => $dns_advanced,
+  #   }),
+  #   order   => '10',
+  # }
+
+  # # DNS hosts fragment (only if hosts are defined)
+  # if !empty($dns_hosts) {
+  #   concat::fragment { 'pihole_dns_hosts':
+  #     target  => '/etc/pihole/pihole.toml',
+  #     content => epp('pihole/20_dns_hosts.toml.epp', {
+  #       'dns_hosts' => $dns_hosts,
+  #     }),
+  #     order   => '20',
+  #   }
+  # }
+
+  # # Webserver configuration fragment
+  # if $webserver_enabled {
+  #   concat::fragment { 'pihole_webserver':
+  #     target  => '/etc/pihole/pihole.toml',
+  #     content => epp('pihole/40_webserver.toml.epp', {
+  #       'webserver_port'     => $webserver_port,
+  #       'api_password_hash'  => $api_password_hash,
+  #       'webserver_advanced' => $webserver_advanced,
+  #     }),
+  #     order   => '40',
+  #   }
+  # }
+
+  # # DHCP configuration fragment
+  # if $dhcp_enabled {
+  #   concat::fragment { 'pihole_dhcp':
+  #     target  => '/etc/pihole/pihole.toml',
+  #     content => epp('pihole/50_dhcp.toml.epp', {
+  #       'dhcp_config' => $dhcp_config,
+  #     }),
+  #     order   => '50',
+  #   }
+  # }
+
+  # # NTP configuration fragment (only if NTP settings are defined)
+  # if !empty($ntp_config) {
+  #   concat::fragment { 'pihole_ntp':
+  #     target  => '/etc/pihole/pihole.toml',
+  #     content => epp('pihole/60_ntp.toml.epp', {
+  #       'ntp_config' => $ntp_config,
+  #     }),
+  #     order   => '60',
+  #   }
+  # }
+
+  # # Database configuration fragment (only if database settings are defined)
+  # if !empty($database_config) {
+  #   concat::fragment { 'pihole_database':
+  #     target  => '/etc/pihole/pihole.toml',
+  #     content => epp('pihole/70_database.toml.epp', {
+  #       'database_config' => $database_config,
+  #     }),
+  #     order   => '70',
+  #   }
+  # }
+
+  # # Misc and privacy settings fragment
+  # concat::fragment { 'pihole_misc':
+  #   target  => '/etc/pihole/pihole.toml',
+  #   content => epp('pihole/90_misc.toml.epp', {
+  #     'privacy_level' => $privacy_level,
+  #     'misc_config'   => $misc_config,
+  #   }),
+  #   order   => '90',
+  # }
+
+  # # Debug configuration fragment (only if debug settings are defined)
+  # if !empty($debug_config) {
+  #   concat::fragment { 'pihole_debug':
+  #     target  => '/etc/pihole/pihole.toml',
+  #     content => epp('pihole/95_debug.toml.epp', {
+  #       'debug_config' => $debug_config,
+  #     }),
+  #     order   => '95',
+  #   }
+  # }
+
+  # TEST: Use inifile to manage a single setting
+  ini_setting { 'pihole_blockTTL':
     ensure  => present,
-    mode    => '0644',
-    owner   => $user,
-    group   => $group,
-    require => File['/etc/pihole'],
-  }
-
-  # Header fragment
-  concat::fragment { 'pihole_header':
-    target  => '/etc/pihole/pihole.toml',
-    content => epp('pihole/00_header.toml.epp'),
-    order   => '00',
-  }
-
-  # DNS basic configuration fragment
-  concat::fragment { 'pihole_dns_basic':
-    target  => '/etc/pihole/pihole.toml',
-    content => epp('pihole/10_dns_basic.toml.epp', {
-      'dns_servers'     => $dns_servers,
-      'interface'       => $interface,
-      'dns_domain'      => $dns_domain,
-      'listening_mode'  => $listening_mode,
-      'query_logging'   => $query_logging,
-      'cache_size'      => $cache_size,
-      'blocking_enabled'=> $blocking_enabled,
-      'dns_advanced'    => $dns_advanced,
-    }),
-    order   => '10',
-  }
-
-  # DNS hosts fragment (only if hosts are defined)
-  if !empty($dns_hosts) {
-    concat::fragment { 'pihole_dns_hosts':
-      target  => '/etc/pihole/pihole.toml',
-      content => epp('pihole/20_dns_hosts.toml.epp', {
-        'dns_hosts' => $dns_hosts,
-      }),
-      order   => '20',
-    }
-  }
-
-  # Webserver configuration fragment
-  if $webserver_enabled {
-    concat::fragment { 'pihole_webserver':
-      target  => '/etc/pihole/pihole.toml',
-      content => epp('pihole/40_webserver.toml.epp', {
-        'webserver_port'     => $webserver_port,
-        'api_password_hash'  => $api_password_hash,
-        'webserver_advanced' => $webserver_advanced,
-      }),
-      order   => '40',
-    }
-  }
-
-  # DHCP configuration fragment
-  if $dhcp_enabled {
-    concat::fragment { 'pihole_dhcp':
-      target  => '/etc/pihole/pihole.toml',
-      content => epp('pihole/50_dhcp.toml.epp', {
-        'dhcp_config' => $dhcp_config,
-      }),
-      order   => '50',
-    }
-  }
-
-  # NTP configuration fragment (only if NTP settings are defined)
-  if !empty($ntp_config) {
-    concat::fragment { 'pihole_ntp':
-      target  => '/etc/pihole/pihole.toml',
-      content => epp('pihole/60_ntp.toml.epp', {
-        'ntp_config' => $ntp_config,
-      }),
-      order   => '60',
-    }
-  }
-
-  # Database configuration fragment (only if database settings are defined)
-  if !empty($database_config) {
-    concat::fragment { 'pihole_database':
-      target  => '/etc/pihole/pihole.toml',
-      content => epp('pihole/70_database.toml.epp', {
-        'database_config' => $database_config,
-      }),
-      order   => '70',
-    }
-  }
-
-  # Misc and privacy settings fragment
-  concat::fragment { 'pihole_misc':
-    target  => '/etc/pihole/pihole.toml',
-    content => epp('pihole/90_misc.toml.epp', {
-      'privacy_level' => $privacy_level,
-      'misc_config'   => $misc_config,
-    }),
-    order   => '90',
-  }
-
-  # Debug configuration fragment (only if debug settings are defined)
-  if !empty($debug_config) {
-    concat::fragment { 'pihole_debug':
-      target  => '/etc/pihole/pihole.toml',
-      content => epp('pihole/95_debug.toml.epp', {
-        'debug_config' => $debug_config,
-      }),
-      order   => '95',
-    }
+    path    => '/etc/pihole/pihole.toml',
+    section => 'dns',
+    setting => 'blockTTL',
+    value   => '5',
+    require => [File['/etc/pihole'], Exec['install_pihole']],
   }
 
   # Download the Pi-hole installer (only if pihole not already installed)
@@ -254,7 +265,7 @@ class pihole (
     user    => 'root',
     group   => 'root',
     unless  => 'test -f /usr/local/bin/pihole',
-    require => [File[$full_installer_path], Package['curl', 'ca-certificates'], Concat['/etc/pihole/pihole.toml'], User[$user]],
+    require => [File[$full_installer_path], Package['curl', 'ca-certificates'], User[$user]],
     timeout => 0,
   }
 
