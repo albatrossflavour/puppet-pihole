@@ -272,7 +272,7 @@ class pihole (
   service { 'pihole-FTL':
     ensure    => 'running',
     enable    => 'true',
-    subscribe => Concat['/etc/pihole/pihole.toml'],
+    #subscribe => Concat['/etc/pihole/pihole.toml'],
   }
 
 }
