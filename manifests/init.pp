@@ -220,7 +220,6 @@ class pihole (
     ensure => file,
     source => $installer_url,
     mode   => '0755',
-    unless => 'test -f /usr/local/bin/pihole',
   }
 
   # Execute the Pi-hole installer
