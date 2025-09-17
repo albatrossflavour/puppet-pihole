@@ -48,6 +48,10 @@
 #   Hash of miscellaneous configuration options
 # @param debug_config
 #   Hash of debug configuration options
+# @param user
+#   User account for Pi-hole processes
+# @param group
+#   Group for Pi-hole processes
 #
 # @example Basic usage
 #   include pihole
@@ -89,8 +93,28 @@ class pihole (
   Hash $database_config = {},
   Hash $misc_config = {},
   Hash $debug_config = {},
+  String $user = 'pihole',
+  String $group = 'pihole',
 ) {
   $full_installer_path = "${installer_path}/${installer_filename}"
+
+  # Create pihole group
+  group { $group:
+    ensure => present,
+    system => true,
+  }
+
+  # Create pihole user
+  user { $user:
+    ensure     => present,
+    gid        => $group,
+    system     => true,
+    shell      => '/usr/bin/nologin',
+    home       => '/home/pihole',
+    managehome => false,
+    comment    => 'Pi-hole service user',
+    require    => Group[$group],
+  }
 
   # Ensure required packages are installed for the Pi-hole installer
   package { ['curl', 'ca-certificates']:
@@ -99,18 +123,19 @@ class pihole (
 
   # Create Pi-hole config directory
   file { '/etc/pihole':
-    ensure => directory,
-    mode   => '0755',
-    owner  => 'root',
-    group  => 'root',
+    ensure  => directory,
+    mode    => '0755',
+    owner   => $user,
+    group   => $group,
+    require => User[$user],
   }
 
   # Manage pihole.toml configuration file using concat
   concat { '/etc/pihole/pihole.toml':
     ensure  => present,
     mode    => '0644',
-    owner   => 'root',
-    group   => 'root',
+    owner   => $user,
+    group   => $group,
     require => File['/etc/pihole'],
   }
 
@@ -229,7 +254,7 @@ class pihole (
     user    => 'root',
     group   => 'root',
     unless  => 'test -f /usr/local/bin/pihole',
-    require => [File[$full_installer_path], Package['curl', 'ca-certificates'], Concat['/etc/pihole/pihole.toml']],
+    require => [File[$full_installer_path], Package['curl', 'ca-certificates'], Concat['/etc/pihole/pihole.toml'], User[$user]],
     timeout => 0,
   }
 }
