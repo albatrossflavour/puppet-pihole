@@ -109,7 +109,7 @@ class pihole (
     ensure     => present,
     gid        => $group,
     system     => true,
-    shell      => '/usr/bin/nologin',
+    shell      => '/usr/sbin/nologin',
     home       => '/home/pihole',
     managehome => false,
     comment    => 'Pi-hole service user',
