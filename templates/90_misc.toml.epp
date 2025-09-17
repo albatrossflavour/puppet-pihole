@@ -1,0 +1,94 @@
+<%- | Integer $privacy_level,
+      Hash $misc_config
+| -%>
+<%
+  # Default misc settings
+  $misc_defaults = {
+    'delayStartup' => 0,
+    'nice' => -10,
+    'addr2line' => true,
+    'etcDnsmasqD' => false,
+    'dnsmasqLines' => [],
+    'extraLogging' => false,
+    'readOnly' => false,
+    'checkLoad' => false,
+    'checkShmem' => 90,
+    'checkDisk' => 90,
+    'pidFile' => '/run/pihole-FTL.pid',
+    'database' => '/etc/pihole/pihole-FTL.db',
+    'gravity' => '/etc/pihole/gravity.db',
+    'gravityTmp' => '/tmp',
+    'macvendor' => '/etc/pihole/macvendor.db',
+    'pcap' => '',
+    'ftlLog' => '/var/log/pihole/FTL.log',
+    'dnsmasqLog' => '/var/log/pihole/pihole.log',
+    'webserverLog' => '/var/log/pihole/webserver.log',
+  }
+
+  # Merge user settings with defaults
+  $final_misc = $misc_defaults + $misc_config
+-%>
+
+[misc]
+  # Using privacy levels you can specify which level of detail you want to see in your Pi-hole statistics
+  privacylevel = <%= $privacy_level %>
+
+  # During startup, network interfaces appear only late during system startup
+  delay_startup = <%= $final_misc['delayStartup'] %>
+
+  # Set niceness of pihole-FTL
+  nice = <%= $final_misc['nice'] %>
+
+  # Should FTL translate its own stack addresses into code lines during the bug backtrace?
+  addr2line = <%= $final_misc['addr2line'] %>
+
+  # Should FTL load additional dnsmasq configuration files from /etc/dnsmasq.d/?
+  etc_dnsmasq_d = <%= $final_misc['etcDnsmasqD'] %>
+
+  # Additional lines to inject into the generated dnsmasq configuration
+  dnsmasq_lines = <%= $final_misc['dnsmasqLines'].stdlib::to_json_pretty %>
+
+  # Log additional information about queries and replies to pihole.log
+  extraLogging = <%= $final_misc['extraLogging'] %>
+
+  # Put configuration into read-only mode
+  readOnly = <%= $final_misc['readOnly'] %>
+
+  [misc.check]
+    # Check system load
+    load = <%= $final_misc['checkLoad'] %>
+
+    # Check shared memory usage
+    shmem = <%= $final_misc['checkShmem'] %>
+
+    # Check disk usage
+    disk = <%= $final_misc['checkDisk'] %>
+
+[files]
+  # The file which contains the PID of FTL's main process
+  pid = "<%= $final_misc['pidFile'] %>"
+
+  # The location of FTL's long-term database
+  database = "<%= $final_misc['database'] %>"
+
+  # The location of Pi-hole's gravity database
+  gravity = "<%= $final_misc['gravity'] %>"
+
+  # A temporary directory where Pi-hole can store files during gravity updates
+  gravity_tmp = "<%= $final_misc['gravityTmp'] %>"
+
+  # The database containing MAC -> Vendor information for the network table
+  macvendor = "<%= $final_misc['macvendor'] %>"
+
+  # An optional file containing a pcap capture of the network traffic
+  pcap = "<%= $final_misc['pcap'] %>"
+
+  [files.log]
+    # The location of FTL's log file
+    ftl = "<%= $final_misc['ftlLog'] %>"
+
+    # The log file used by the embedded dnsmasq DNS server
+    dnsmasq = "<%= $final_misc['dnsmasqLog'] %>"
+
+    # The log file used by the webserver
+    webserver = "<%= $final_misc['webserverLog'] %>"

@@ -1,0 +1,145 @@
+<%- | String $webserver_port,
+      Optional[String] $api_password_hash,
+      Hash $webserver_advanced
+| -%>
+<%
+  # Default webserver settings
+  $webserver_defaults = {
+    'domain' => 'pi.hole',
+    'acl' => '',
+    'threads' => 50,
+    'headers' => [
+      'X-DNS-Prefetch-Control: off',
+      'Content-Security-Policy: default-src \'self\' \'unsafe-inline\';',
+      'X-Frame-Options: DENY',
+      'X-XSS-Protection: 0',
+      'X-Content-Type-Options: nosniff',
+      'Referrer-Policy: strict-origin-when-cross-origin'
+    ],
+    'serve_all' => false,
+    'sessionTimeout' => 1800,
+    'sessionRestore' => true,
+    'tlsCert' => '/etc/pihole/tls.pem',
+    'webroot' => '/var/www/html',
+    'webhome' => '/admin/',
+    'prefix' => '',
+    'boxed' => true,
+    'theme' => 'default-auto',
+    'maxSessions' => 16,
+    'prettyJSON' => false,
+    'totpSecret' => '',
+    'appPwhash' => '',
+    'appSudo' => false,
+    'cliPw' => true,
+    'excludeClients' => [],
+    'excludeDomains' => [],
+    'maxHistory' => 86400,
+    'maxClients' => 10,
+    'clientHistoryGlobalMax' => true,
+    'allowDestructive' => true,
+    'tempLimit' => 60.0,
+    'tempUnit' => 'C',
+  }
+
+  # Merge user settings with defaults
+  $final_webserver = $webserver_defaults + $webserver_advanced
+-%>
+
+[webserver]
+  # On which domain is the web interface served?
+  domain = "<%= $final_webserver['domain'] %>"
+
+  # Webserver access control list (ACL)
+  acl = "<%= $final_webserver['acl'] %>"
+
+  # Ports to be used by the webserver
+  port = "<%= $webserver_port %>"
+
+  # Maximum number of worker threads allowed
+  threads = <%= $final_webserver['threads'] %>
+
+  # Additional HTTP headers added to the web server responses
+  headers = <%= $final_webserver['headers'].stdlib::to_json_pretty %>
+
+  # Should the web server serve all files in webserver.paths.webroot directory?
+  serve_all = <%= $final_webserver['serve_all'] %>
+
+  [webserver.session]
+    # Session timeout in seconds
+    timeout = <%= $final_webserver['sessionTimeout'] %>
+
+    # Should Pi-hole backup and restore sessions from the database?
+    restore = <%= $final_webserver['sessionRestore'] %>
+
+  [webserver.tls]
+    # Path to the TLS (SSL) certificate file
+    cert = "<%= $final_webserver['tlsCert'] %>"
+
+  [webserver.paths]
+    # Server root on the host
+    webroot = "<%= $final_webserver['webroot'] %>"
+
+    # Sub-directory of the root containing the web interface
+    webhome = "<%= $final_webserver['webhome'] %>"
+
+    # Prefix where the web interface is served
+    prefix = "<%= $final_webserver['prefix'] %>"
+
+  [webserver.interface]
+    # Should the web interface use the boxed layout?
+    boxed = <%= $final_webserver['boxed'] %>
+
+    # Theme used by the Pi-hole web interface
+    theme = "<%= $final_webserver['theme'] %>"
+
+  [webserver.api]
+    # Number of concurrent sessions allowed for the API
+    max_sessions = <%= $final_webserver['maxSessions'] %>
+
+    # Should FTL prettify the API output?
+    prettyJSON = <%= $final_webserver['prettyJSON'] %>
+
+<% if $api_password_hash { -%>
+    # API password hash
+    pwhash = "<%= $api_password_hash %>"
+<% } else { -%>
+    # API password hash
+    pwhash = ""
+<% } -%>
+
+    # Pi-hole 2FA TOTP secret
+    totp_secret = "<%= $final_webserver['totpSecret'] %>"
+
+    # Pi-hole application password
+    app_pwhash = "<%= $final_webserver['appPwhash'] %>"
+
+    # Should application password API sessions be allowed to modify config settings?
+    app_sudo = <%= $final_webserver['appSudo'] %>
+
+    # Should FTL create a temporary CLI password?
+    cli_pw = <%= $final_webserver['cliPw'] %>
+
+    # Array of clients to be excluded from certain API responses
+    excludeClients = <%= $final_webserver['excludeClients'].stdlib::to_json_pretty %>
+
+    # Array of domains to be excluded from certain API responses
+    excludeDomains = <%= $final_webserver['excludeDomains'].stdlib::to_json_pretty %>
+
+    # How much history should be imported from the database and returned by the API [seconds]?
+    maxHistory = <%= $final_webserver['maxHistory'] %>
+
+    # Up to how many clients should be returned in the activity graph endpoint?
+    maxClients = <%= $final_webserver['maxClients'] %>
+
+    # How should the API compute the most active clients?
+    client_history_global_max = <%= $final_webserver['clientHistoryGlobalMax'] %>
+
+    # Allow destructive API calls
+    allow_destructive = <%= $final_webserver['allowDestructive'] %>
+
+    [webserver.api.temp]
+      # Which upper temperature limit should be used by Pi-hole?
+      limit = <%= $final_webserver['tempLimit'] %>
+
+      # Which temperature unit should be used for temperatures processed by FTL?
+      unit = "<%= $final_webserver['tempUnit'] %>"

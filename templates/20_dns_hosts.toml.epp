@@ -1,0 +1,8 @@
+<%- | Array[String] $dns_hosts | -%>
+
+  # Array of custom DNS records
+  hosts = [
+<% $dns_hosts.each |$host| { -%>
+    "<%= $host %>",
+<% } -%>
+  ]

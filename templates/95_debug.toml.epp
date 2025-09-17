@@ -1,0 +1,130 @@
+<%- | Hash $debug_config | -%>
+<%
+  # Default debug settings (all false by default)
+  $debug_defaults = {
+    'database' => false,
+    'networking' => false,
+    'locks' => false,
+    'queries' => false,
+    'flags' => false,
+    'shmem' => false,
+    'gc' => false,
+    'arp' => false,
+    'regex' => false,
+    'api' => false,
+    'tls' => false,
+    'overtime' => false,
+    'status' => false,
+    'caps' => false,
+    'dnssec' => false,
+    'vectors' => false,
+    'resolver' => false,
+    'edns0' => false,
+    'clients' => false,
+    'aliasclients' => false,
+    'events' => false,
+    'helper' => false,
+    'config' => false,
+    'inotify' => false,
+    'webserver' => false,
+    'extra' => false,
+    'reserved' => false,
+    'ntp' => false,
+    'netlink' => false,
+    'all' => false,
+  }
+
+  # Merge user settings with defaults
+  $final_debug = $debug_defaults + $debug_config
+-%>
+
+[debug]
+  # Print debugging information about database actions
+  database = <%= $final_debug['database'] %>
+
+  # Prints a list of the detected interfaces on the startup of pihole-FTL
+  networking = <%= $final_debug['networking'] %>
+
+  # Print information about shared memory locks
+  locks = <%= $final_debug['locks'] %>
+
+  # Print extensive query information
+  queries = <%= $final_debug['queries'] %>
+
+  # Print flags of queries received by the DNS hooks
+  flags = <%= $final_debug['flags'] %>
+
+  # Print information about shared memory buffers
+  shmem = <%= $final_debug['shmem'] %>
+
+  # Print information about garbage collection (GC)
+  gc = <%= $final_debug['gc'] %>
+
+  # Print information about ARP table processing
+  arp = <%= $final_debug['arp'] %>
+
+  # Controls if FTLDNS should print extended details about regex matching
+  regex = <%= $final_debug['regex'] %>
+
+  # Print extra debugging information concerning API calls
+  api = <%= $final_debug['api'] %>
+
+  # Print extra debugging information about TLS connections
+  tls = <%= $final_debug['tls'] %>
+
+  # Print information about overTime memory operations
+  overtime = <%= $final_debug['overtime'] %>
+
+  # Print information about status changes for individual queries
+  status = <%= $final_debug['status'] %>
+
+  # Print information about capabilities granted to the pihole-FTL process
+  caps = <%= $final_debug['caps'] %>
+
+  # Print information about DNSSEC activity
+  dnssec = <%= $final_debug['dnssec'] %>
+
+  # FTL uses dynamically allocated vectors for various tasks
+  vectors = <%= $final_debug['vectors'] %>
+
+  # Extensive information about hostname resolution
+  resolver = <%= $final_debug['resolver'] %>
+
+  # Print debugging information about received EDNS(0) data
+  edns0 = <%= $final_debug['edns0'] %>
+
+  # Log various important client events
+  clients = <%= $final_debug['clients'] %>
+
+  # Log information related to alias-client processing
+  aliasclients = <%= $final_debug['aliasclients'] %>
+
+  # Log information regarding FTL's embedded event handling queue
+  events = <%= $final_debug['events'] %>
+
+  # Log information about script helpers
+  helper = <%= $final_debug['helper'] %>
+
+  # Print config parsing details
+  config = <%= $final_debug['config'] %>
+
+  # Debug monitoring of /etc/pihole filesystem events
+  inotify = <%= $final_debug['inotify'] %>
+
+  # Debug monitoring of the webserver (CivetWeb) events
+  webserver = <%= $final_debug['webserver'] %>
+
+  # Temporary flag that may print additional information
+  extra = <%= $final_debug['extra'] %>
+
+  # Reserved debug flag
+  reserved = <%= $final_debug['reserved'] %>
+
+  # Print information about NTP synchronization
+  ntp = <%= $final_debug['ntp'] %>
+
+  # Print information about netlink communication and parsing
+  netlink = <%= $final_debug['netlink'] %>
+
+  # Set all debug flags at once
+  all = <%= $final_debug['all'] %>

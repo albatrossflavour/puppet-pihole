@@ -1,0 +1,48 @@
+<%- | Hash $database_config | -%>
+<%
+  # Default database settings
+  $database_defaults = {
+    'DBimport' => true,
+    'maxDBdays' => 91,
+    'DBinterval' => 60,
+    'useWAL' => true,
+    'parseARPcache' => true,
+    'networkExpire' => 91,
+  }
+
+  # Merge user settings with defaults
+  $final_database = $database_defaults + $database_config
+-%>
+
+[resolver]
+  # Should FTL try to resolve IPv4 addresses to hostnames?
+  resolveIPv4 = true
+
+  # Should FTL try to resolve IPv6 addresses to hostnames?
+  resolveIPv6 = true
+
+  # Control whether FTL should use the fallback option to try to obtain client names from checking the network table
+  networkNames = true
+
+  # With this option, you can change how (and if) hourly PTR requests are made
+  refreshNames = "IPV4_ONLY"
+
+[database]
+  # Should FTL load information from the database on startup?
+  DBimport = <%= $final_database['DBimport'] %>
+
+  # How long should queries be stored in the database [days]?
+  maxDBdays = <%= $final_database['maxDBdays'] %>
+
+  # How often do we store queries in FTL's database [seconds]?
+  DBinterval = <%= $final_database['DBinterval'] %>
+
+  # Should FTL enable Write-Ahead Log (WAL) mode for the on-disk query database?
+  useWAL = <%= $final_database['useWAL'] %>
+
+  [database.network]
+    # Should FTL analyze the local ARP cache?
+    parseARPcache = <%= $final_database['parseARPcache'] %>
+
+    # How long should IP addresses be kept in the network_addresses table [days]?
+    expire = <%= $final_database['networkExpire'] %>

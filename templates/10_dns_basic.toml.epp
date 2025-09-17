@@ -1,0 +1,179 @@
+<%- | Array[String] $dns_servers,
+      Optional[String] $interface,
+      String $dns_domain,
+      String $listening_mode,
+      Boolean $query_logging,
+      Integer $cache_size,
+      Boolean $blocking_enabled,
+      Hash $dns_advanced
+| -%>
+<%
+  # Default DNS advanced settings
+  $dns_defaults = {
+    'CNAMEdeepInspect' => true,
+    'blockESNI' => true,
+    'EDNS0ECS' => true,
+    'ignoreLocalhost' => false,
+    'showDNSSEC' => true,
+    'analyzeOnlyAandAAAA' => false,
+    'piholePTR' => 'PI.HOLE',
+    'replyWhenBusy' => 'ALLOW',
+    'blockTTL' => 2,
+    'domainNeeded' => true,
+    'expandHosts' => true,
+    'bogusPriv' => false,
+    'dnssec' => false,
+    'port' => 53,
+    'cnameRecords' => [],
+    'revServers' => [],
+    'cacheOptimizer' => 3600,
+    'upstreamBlockedTTL' => 86400,
+    'blockingMode' => 'NULL',
+    'blockingEdns' => 'TEXT',
+    'mozillaCanary' => true,
+    'iCloudPrivateRelay' => false,
+    'designatedResolver' => true,
+    'hostForce4' => false,
+    'hostIPv4' => '',
+    'hostForce6' => false,
+    'hostIPv6' => '',
+    'blockingForce4' => false,
+    'blockingIPv4' => '',
+    'blockingForce6' => false,
+    'blockingIPv6' => '',
+    'rateLimitCount' => 1000,
+    'rateLimitInterval' => 60,
+  }
+
+  # Merge user settings with defaults
+  $final_dns = $dns_defaults + $dns_advanced
+-%>
+
+[dns]
+  # Array of upstream DNS servers used by Pi-hole
+  upstreams = [<%= $dns_servers.map |$server| { "\"${server}\"" }.join(', ') %>]
+
+  # Use this option to control deep CNAME inspection
+  CNAMEdeepInspect = <%= $final_dns['CNAMEdeepInspect'] %>
+
+  # Should _esni. subdomains be blocked by default?
+  blockESNI = <%= $final_dns['blockESNI'] %>
+
+  # Should we overwrite the query source when client information is provided through EDNS0 client subnet (ECS) information?
+  EDNS0ECS = <%= $final_dns['EDNS0ECS'] %>
+
+  # Should FTL hide queries made by localhost?
+  ignoreLocalhost = <%= $final_dns['ignoreLocalhost'] %>
+
+  # Should FTL analyze and show internally generated DNSSEC queries?
+  showDNSSEC = <%= $final_dns['showDNSSEC'] %>
+
+  # Should FTL analyze *only* A and AAAA queries?
+  analyzeOnlyAandAAAA = <%= $final_dns['analyzeOnlyAandAAAA'] %>
+
+  # Controls whether and how FTL will reply with for address for which a local interface exists
+  piholePTR = "<%= $final_dns['piholePTR'] %>"
+
+  # How should FTL handle queries when the gravity database is not available?
+  replyWhenBusy = "<%= $final_dns['replyWhenBusy'] %>"
+
+  # FTL's internal TTL to be handed out for blocked queries in seconds
+  blockTTL = <%= $final_dns['blockTTL'] %>
+
+  # If set, A and AAAA queries for plain names, without dots or domain parts, are never forwarded to upstream nameservers
+  domainNeeded = <%= $final_dns['domainNeeded'] %>
+
+  # If set, the domain is added to simple names (without a period) in /etc/hosts in the same way as for DHCP-derived names
+  expandHosts = <%= $final_dns['expandHosts'] %>
+
+  # The DNS domain used by your Pi-hole
+  domain = "<%= $dns_domain %>"
+
+  # Should all reverse lookups for private IP ranges be answered with "no such domain" rather than being forwarded upstream?
+  bogusPriv = <%= $final_dns['bogusPriv'] %>
+
+  # Validate DNS replies using DNSSEC?
+  dnssec = <%= $final_dns['dnssec'] %>
+
+<% if $interface { -%>
+  # Interface to use for DNS and DHCP (if enabled)
+  interface = "<%= $interface %>"
+<% } -%>
+
+  # Pi-hole interface listening modes
+  listeningMode = "<%= $listening_mode %>"
+
+  # Log DNS queries and replies to pihole.log
+  queryLogging = <%= $query_logging %>
+
+  # List of CNAME records
+  cnameRecords = <%= $final_dns['cnameRecords'].stdlib::to_json_pretty %>
+
+  # Port used by the DNS server
+  port = <%= $final_dns['port'] %>
+
+  # Reverse server feature
+  revServers = <%= $final_dns['revServers'].stdlib::to_json_pretty %>
+
+  [dns.cache]
+    # Cache size of the DNS server
+    size = <%= $cache_size %>
+
+    # Query cache optimizer
+    optimizer = <%= $final_dns['cacheOptimizer'] %>
+
+    # TTL for queries blocked upstream
+    upstreamBlockedTTL = <%= $final_dns['upstreamBlockedTTL'] %>
+
+  [dns.blocking]
+    # Should FTL block queries?
+    active = <%= $blocking_enabled %>
+
+    # How should FTL reply to blocked queries?
+    mode = "<%= $final_dns['blockingMode'] %>"
+
+    # Should FTL enrich blocked replies with EDNS0 information?
+    edns = "<%= $final_dns['blockingEdns'] %>"
+
+  [dns.specialDomains]
+    # Should Pi-hole always reply with NXDOMAIN to disable Firefox automatic DNS-over-HTTP?
+    mozillaCanary = <%= $final_dns['mozillaCanary'] %>
+
+    # Should Pi-hole always reply with NXDOMAIN to disable Apple's iCloud Private Relay?
+    iCloudPrivateRelay = <%= $final_dns['iCloudPrivateRelay'] %>
+
+    # Should Pi-hole always reply with NODATA to prevent devices from bypassing Pi-hole using Discovery of Designated Resolvers?
+    designatedResolver = <%= $final_dns['designatedResolver'] %>
+
+    [dns.reply.host]
+      # Use a specific IPv4 address for the Pi-hole host?
+      force4 = <%= $final_dns['hostForce4'] %>
+
+      # Custom IPv4 address for the Pi-hole host
+      IPv4 = "<%= $final_dns['hostIPv4'] %>"
+
+      # Use a specific IPv6 address for the Pi-hole host?
+      force6 = <%= $final_dns['hostForce6'] %>
+
+      # Custom IPv6 address for the Pi-hole host
+      IPv6 = "<%= $final_dns['hostIPv6'] %>"
+
+    [dns.reply.blocking]
+      # Use a specific IPv4 address in IP blocking mode?
+      force4 = <%= $final_dns['blockingForce4'] %>
+
+      # Custom IPv4 address for IP blocking mode
+      IPv4 = "<%= $final_dns['blockingIPv4'] %>"
+
+      # Use a specific IPv6 address in IP blocking mode?
+      force6 = <%= $final_dns['blockingForce6'] %>
+
+      # Custom IPv6 address for IP blocking mode
+      IPv6 = "<%= $final_dns['blockingIPv6'] %>"
+
+  [dns.rateLimit]
+    # How many queries are permitted...
+    count = <%= $final_dns['rateLimitCount'] %>
+
+    # ... in the set interval before rate-limiting?
+    interval = <%= $final_dns['rateLimitInterval'] %>

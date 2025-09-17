@@ -1,0 +1,58 @@
+<%- | Hash $dhcp_config | -%>
+<%
+  # Default DHCP settings
+  $dhcp_defaults = {
+    'active' => true,
+    'start' => '',
+    'end' => '',
+    'router' => '',
+    'netmask' => '',
+    'leaseTime' => '',
+    'ipv6' => false,
+    'rapidCommit' => false,
+    'multiDNS' => false,
+    'logging' => false,
+    'ignoreUnknownClients' => false,
+    'hosts' => [],
+  }
+
+  # Merge user settings with defaults
+  $final_dhcp = $dhcp_defaults + $dhcp_config
+-%>
+
+[dhcp]
+  # Is the embedded DHCP server enabled?
+  active = <%= $final_dhcp['active'] %>
+
+  # Start address of the DHCP address pool
+  start = "<%= $final_dhcp['start'] %>"
+
+  # End address of the DHCP address pool
+  end = "<%= $final_dhcp['end'] %>"
+
+  # Address of the gateway to be used
+  router = "<%= $final_dhcp['router'] %>"
+
+  # The netmask used by your Pi-hole
+  netmask = "<%= $final_dhcp['netmask'] %>"
+
+  # Lease time
+  leaseTime = "<%= $final_dhcp['leaseTime'] %>"
+
+  # Should Pi-hole make an attempt to also satisfy IPv6 address requests?
+  ipv6 = <%= $final_dhcp['ipv6'] %>
+
+  # Enable DHCPv4 Rapid Commit Option specified in RFC 4039
+  rapidCommit = <%= $final_dhcp['rapidCommit'] %>
+
+  # Advertise DNS server multiple times to clients
+  multiDNS = <%= $final_dhcp['multiDNS'] %>
+
+  # Enable logging for DHCP
+  logging = <%= $final_dhcp['logging'] %>
+
+  # Ignore unknown DHCP clients
+  ignoreUnknownClients = <%= $final_dhcp['ignoreUnknownClients'] %>
+
+  # Per host parameters for the DHCP server
+  hosts = <%= $final_dhcp['hosts'].stdlib::to_json_pretty %>

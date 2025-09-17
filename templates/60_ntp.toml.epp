@@ -1,0 +1,57 @@
+<%- | Hash $ntp_config | -%>
+<%
+  # Default NTP settings
+  $ntp_defaults = {
+    'ipv4Active' => false,
+    'ipv4Address' => '',
+    'ipv6Active' => false,
+    'ipv6Address' => '',
+    'syncActive' => false,
+    'syncServer' => 'pool.ntp.org',
+    'syncInterval' => 3600,
+    'syncCount' => 8,
+    'rtcSet' => false,
+    'rtcDevice' => '',
+    'rtcUtc' => true,
+  }
+
+  # Merge user settings with defaults
+  $final_ntp = $ntp_defaults + $ntp_config
+-%>
+
+  [ntp.ipv4]
+    # Should FTL act as network time protocol (NTP) server (IPv4)?
+    active = <%= $final_ntp['ipv4Active'] %>
+
+    # IPv4 address to listen on for NTP requests
+    address = "<%= $final_ntp['ipv4Address'] %>"
+
+  [ntp.ipv6]
+    # Should FTL act as network time protocol (NTP) server (IPv6)?
+    active = <%= $final_ntp['ipv6Active'] %>
+
+    # IPv6 address to listen on for NTP requests
+    address = "<%= $final_ntp['ipv6Address'] %>"
+
+  [ntp.sync]
+    # Should FTL try to synchronize the system time with an upstream NTP server?
+    active = <%= $final_ntp['syncActive'] %>
+
+    # NTP upstream server to sync with
+    server = "<%= $final_ntp['syncServer'] %>"
+
+    # Interval in seconds between successive synchronization attempts
+    interval = <%= $final_ntp['syncInterval'] %>
+
+    # Number of NTP syncs to perform and average before updating the system time
+    count = <%= $final_ntp['syncCount'] %>
+
+    [ntp.sync.rtc]
+      # Should FTL update a real-time clock (RTC) if available?
+      set = <%= $final_ntp['rtcSet'] %>
+
+      # Path to the RTC device to update
+      device = "<%= $final_ntp['rtcDevice'] %>"
+
+      # Should the RTC be set to UTC?
+      utc = <%= $final_ntp['rtcUtc'] %>
